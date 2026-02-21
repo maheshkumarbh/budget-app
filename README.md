@@ -1,30 +1,8 @@
 # Budget Analyzer
 
 A frugal budgeting app that analyzes your bank statements and credit card transactions to help you identify expense-cutting opportunities.
+
 ![Arch Dig](<arch.drawio.png>)
-
-```mermaid
-flowchart LR
-    U[Browser UI<br/>templates/index.html]
-    J[Client Logic<br/>static/js/app.js]
-    API[Flask API<br/>app.py]
-    P[StatementParser<br/>parsers/statement_parser.py]
-    A[ExpenseAnalyzer<br/>analysis/expense_analyzer.py]
-    DB[(SQLite<br/>data/budget.db)]
-    UP[(Uploads Folder<br/>uploads/*.csv)]
-    CR[(category_rules table)]
-
-    U -->|fetch JSON| J
-    J -->|/upload/preview<br/>/upload/commit<br/>/transactions<br/>/categories| API
-    API -->|read files| UP
-    API -->|parse rows| P
-    API -->|analyze txns| A
-    API -->|CRUD txns| DB
-    API -->|CRUD categories| CR
-    A -->|load txns + rules| DB
-    A -->|load custom rules| CR
-    API -->|response: transactions,<br/>analysis, added/skipped| J
-    J
 
 ## Features
 
