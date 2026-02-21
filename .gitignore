@@ -1,0 +1,31 @@
+# Python
+# Byte-compiled / optimized / DLL files.
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.tox/
+
+# Distribution / packaging
+dist/
+build/
+*.whl
+*.egg
+
+# Editors
+# VS Code
+.vscode/
+
+# Linux
+# Editors/IDEs
+# none of the files created by the OS are worth tracking
+
+# Miscellaneous
+.env
+.idea/

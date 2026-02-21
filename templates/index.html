@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f6f8;
+            --bg-elev: #ffffff;
+            --text: #121317;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #2563eb;
+            --accent-2: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 12px 40px rgba(17, 24, 39, 0.08);
+            --gradient: radial-gradient(1200px 600px at 10% -10%, #e0f2fe 0%, transparent 60%),
+                        radial-gradient(1000px 600px at 100% 0%, #ede9fe 0%, transparent 60%);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0b0f14;
+            --bg-elev: #121821;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --border: #1f2937;
+            --accent: #60a5fa;
+            --accent-2: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+            --gradient: radial-gradient(1200px 600px at 10% -10%, #1f2937 0%, transparent 60%),
+                        radial-gradient(1000px 600px at 100% 0%, #1e1b4b 0%, transparent 60%);
+        }
+
+        body {
+            font-family: "DM Sans", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .app-shell {
+            background: var(--gradient);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: var(--bg-elev);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .hero {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+        }
+
+        .card-soft {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            background: var(--bg-elev);
+            box-shadow: var(--shadow);
+            height: 100%;
+        }
+
+        .stat-card h2 {
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            font-weight: 700;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.06), rgba(99, 102, 241, 0.0));
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        .hidden { display: none; }
+
+        .nav-tabs .nav-link {
+            color: var(--muted);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--text);
+            border-color: var(--border) var(--border) var(--bg-elev);
+        }
+
+        .chart-container {
+            height: 360px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-success {
+            background: var(--accent-2);
+            border-color: var(--accent-2);
+        }
+
+        .btn-outline-secondary {
+            color: var(--muted);
+            border-color: var(--border);
+        }
+
+        .table {
+            color: var(--text);
+        }
+
+        .table thead {
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: rgba(148, 163, 184, 0.06);
+        }
+
+        .alert {
+            border-radius: 12px;
+        }
+
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: var(--bg-elev);
+            color: var(--muted);
+        }
+
+        .section-title {
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <nav class="topbar navbar navbar-expand-lg px-4 py-3">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-chart-pie" style="color: var(--accent);"></i>
+                <span class="brand">Budget Lens</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="toggle" id="themeToggle" role="button" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                    <span class="small">Theme</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="hero mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <div class="pill mb-3"><i class="fas fa-shield-alt"></i> Local-first analysis</div>
+                    <h1 class="section-title mb-2">See where your money leaks, fast.</h1>
+                    <p class="muted mb-0">Import statements, confirm columns, and get a clean breakdown with actionable savings ideas.</p>
+                </div>
+                <div class="text-lg-end">
+                    <div class="small muted">Your data is saved locally</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="uploadSection">
+            <div id="returnToResults" class="hidden mb-3">
+                <div class="alert alert-secondary d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-line"></i> You have analyzed data loaded.</span>
+                    <button class="btn btn-sm btn-primary" id="viewResultsBtn">View Results</button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="card-soft p-4">
+                        <h4 class="section-title mb-3"><i class="fas fa-cloud-upload-alt"></i> Upload statements</h4>
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-file-upload fa-2x mb-3" style="color: var(--accent);"></i>
+                                <h5 class="mb-1">Drop files here or click to browse</h5>
+                                <p class="muted mb-3">CSV or Excel statements for bank & credit card accounts</p>
+                                <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls" multiple>
+                            <button class="btn btn-primary" id="chooseFilesBtn">Choose Files</button>
+                        </div>
+                        <div id="uploadSummary" class="mt-3"></div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="section-title">Uploaded Files</div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-danger" id="deleteAllFilesBtn">Delete All Files</button>
+                                <button class="btn btn-sm btn-danger" id="clearAllBtn">Clear All Data</button>
+                            </div>
+                        </div>
+                        <div id="fileList" class="mt-2"></div>
+
+                            <div id="mappingSection" class="mt-4 hidden">
+                                <div class="alert alert-secondary">
+                                    <i class="fas fa-sliders-h"></i> Confirm column mapping before import
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Bank Name</label>
+                                        <input type="text" class="form-control" id="bankName" placeholder="e.g., First Tech Credit Union">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Statement Type</label>
+                                        <select class="form-select" id="statementType">
+                                            <option value="credit">Credit Card</option>
+                                            <option value="bank">Bank Account</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Date Column</label>
+                                        <select class="form-select" id="mapDate"></select>
+                                    </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Description Column</label>
+                                    <select class="form-select" id="mapDescription"></select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Amount Column</label>
+                                    <select class="form-select" id="mapAmount"></select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Debit Column</label>
+                                    <select class="form-select" id="mapDebit"></select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Credit Column</label>
+                                    <select class="form-select" id="mapCredit"></select>
+                                </div>
+                                <div class="col-12">
+                                    <button class="btn btn-success" id="importBtn">Import Transactions</button>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr id="previewHeaders"></tr>
+                                        </thead>
+                                        <tbody id="previewRows"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card-soft p-4">
+                        <h4 class="section-title mb-3"><i class="fas fa-pen"></i> Add a transaction</h4>
+                        <form id="manualForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" id="manualDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Type</label>
+                                <select class="form-select" id="manualType">
+                                    <option value="expense">Expense</option>
+                                    <option value="income">Income</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <input type="text" class="form-control" id="manualDescription" placeholder="Merchant or note" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Amount</label>
+                                <input type="number" step="0.01" class="form-control" id="manualAmount" placeholder="0.00" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Category (optional)</label>
+                                <select class="form-select" id="manualCategory">
+                                    <option value="">Auto</option>
+                                    <option value="food">Food</option>
+                                    <option value="transport">Transport</option>
+                                    <option value="shopping">Shopping</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="housing">Housing</option>
+                                    <option value="education">Education</option>
+                                    <option value="subscriptions">Subscriptions</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-success" type="submit"><i class="fas fa-plus-circle"></i> Add</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-soft p-4 mt-4">
+                        <h4 class="section-title mb-3"><i class="fas fa-tags"></i> Custom Categories</h4>
+                        <form id="categoryForm" class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label">Category Name</label>
+                                <input type="text" class="form-control" id="categoryName" placeholder="e.g., Kids Activities" required>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label">Keywords (comma separated)</label>
+                                <input type="text" class="form-control" id="categoryKeywords" placeholder="e.g., daycare, preschool, camp" required>
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-primary" type="submit">Add Category</button>
+                            </div>
+                        </form>
+                        <div class="mt-3" id="categoryList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsSection" class="hidden">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <button class="btn btn-outline-secondary" id="backToUploadBtn">
+                    <i class="fas fa-arrow-left"></i> Back to Upload
+                </button>
+                <small class="muted">Data stays on this device</small>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="muted">Total Expenses</div>
+                                <h2 id="totalExpenses">$0</h2>
+                            </div>
+                            <i class="fas fa-receipt fa-2x" style="color: var(--danger);"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="muted">Categories</div>
+                                <h2 id="categoryCount">0</h2>
+                            </div>
+                            <i class="fas fa-tags fa-2x" style="color: var(--accent);"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="muted">Potential Savings</div>
+                                <h2 id="potentialSavings">$0</h2>
+                            </div>
+                            <i class="fas fa-lightbulb fa-2x" style="color: var(--warning);"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="muted">Transactions</div>
+                                <h2 id="transactionCount">0</h2>
+                            </div>
+                            <i class="fas fa-list fa-2x" style="color: var(--accent-2);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs" id="analysisTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                        <i class="fas fa-chart-pie"></i> Overview
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button" role="tab">
+                        <i class="fas fa-tags"></i> Categories
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="recommendations-tab" data-bs-toggle="tab" data-bs-target="#recommendations" type="button" role="tab">
+                        <i class="fas fa-lightbulb"></i> Recommendations
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions" type="button" role="tab">
+                        <i class="fas fa-list"></i> Transactions
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="analysisTabsContent">
+                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <div class="card-soft p-3">
+                                <h5 class="section-title">Expense Breakdown</h5>
+                                <div id="categoryChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-soft p-3">
+                                <h5 class="section-title">Monthly Trends</h5>
+                                <div id="trendChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="categories" role="tabpanel">
+                    <div class="row mt-3" id="categoryCards"></div>
+                </div>
+
+                <div class="tab-pane fade" id="recommendations" role="tabpanel">
+                    <div class="mt-3" id="recommendationsList"></div>
+                </div>
+
+                <div class="tab-pane fade" id="transactions" role="tabpanel">
+                    <div class="mt-3 card-soft p-3">
+                        <h5 class="section-title">Recent Transactions</h5>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <select class="form-select form-select-sm" id="categoryFilter" style="min-width: 160px;">
+                                    <option value="">All categories</option>
+                                </select>
+                                <div class="muted small" id="transactionsPageInfo"></div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <select class="form-select form-select-sm" id="pageSizeSelect" style="width: 110px;">
+                                    <option value="25">25 / page</option>
+                                    <option value="50" selected>50 / page</option>
+                                    <option value="100">100 / page</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-secondary" id="prevPageBtn">Prev</button>
+                                <button class="btn btn-sm btn-outline-secondary" id="nextPageBtn">Next</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingSection" class="hidden">
+            <div class="card-soft p-5 text-center">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--accent);"></i>
+                <h4 class="mt-3">Analyzing your expenses…</h4>
+                <p class="muted">This takes a moment for large statements.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
